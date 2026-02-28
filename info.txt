@@ -1,0 +1,1 @@
+Hosting der Datenbanken über Githublogin auf https://supabase.com

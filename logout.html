@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Car Reservation</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <script src="script.js"></script>
+    <script>
+        checkLogin();
+        function logout() {
+            setCookie("login", "", -1); // Cookie löschen
+            setCookie("name", "", -1); // Cookie löschen
+        }
+        logout();
+    </script>
+    <main class="container">
+        <h1>Logged Out</h1>
+        <p>Du wurdest erfolgreich ausgeloggt.</p>
+        <button type="button" onclick="window.location.href='/login.html'">Zurück zum Login</button>
+    </main>
+</body>
+
+</html>

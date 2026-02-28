@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Car Reservation</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+    <script src="script.js"></script>
+
+    <main class="container">
+        <h1>🚗 Car Reservation</h1>
+        <form id="reservationForm">
+            <label for="date">Datum:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Zeit:</label>
+            <input type="time" id="time" name="time" required>
+
+            <label for="duration">Dauer (in Stunden):</label>
+            <input type="number" id="duration" name="duration" min="1" required>
+
+            <label for="purpose">Grund:</label>
+            <select id="purpose" name="purpose" required>
+                <option value="">Bitte Wählen...</option>
+                <option value="Arbeit">Arbeit</option>
+                <option value="Einkaufen">Einkaufen</option>
+                <option value="Freizeit">Freizeit</option>
+                <option value="Sonstiges">Sonstiges</option>
+            </select>
+
+            <button type="submit">Reservieren</button>
+        </form>
+        <div id="status" class="status"></div>
+        <button type="button" onclick="window.location.href='/logout.html'">Logout</button>
+    </main>
+
+    <script>
+        const supabaseUrl = "https://xcmewlpcjdrvhzlkjubv.supabase.co";
+        const supabaseKey = "sb_publishable_4AAr3s-2kTVX7hZ5layp0Q_CctBtTEQ";
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        const form = document.getElementById("reservationForm");
+        const statusDiv = document.getElementById("status");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const name = getCookie("name")
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+            const duration = parseInt(document.getElementById("duration").value);
+            const purpose = document.getElementById("purpose").value;
+
+            // Startzeit und Endzeit als UTC
+            const startTime = new Date(`${date}T${time}`);
+            const endTime = new Date(startTime.getTime() + duration * 60 * 60 * 1000);
+
+            // Überprüfung auf Überschneidung
+            const { data, error } = await supabaseClient
+                .from("reservations")
+                .select("*")
+                .lt("reservation_time", endTime.toISOString())
+                .gte("reservation_time", startTime.toISOString());
+
+            if (error) {
+                statusDiv.innerHTML = "❌ Fehler beim Prüfen: " + error.message;
+                return;
+            }
+
+            if (data.length > 0) {
+                statusDiv.innerHTML = "❌ Dieser Zeitraum ist bereits gebucht!";
+                return;
+            }
+
+            // Einfügen
+            const { error: insertError } = await supabaseClient
+                .from("reservations")
+                .insert([{
+                    name: name,
+                    reservation_time: startTime.toISOString(),
+                    duration: duration,
+                    purpose: purpose
+                }]);
+
+            if (insertError) {
+                statusDiv.innerHTML = "❌ Fehler beim Speichern: " + insertError.message;
+            } else {
+                statusDiv.innerHTML = "✅ Reservierung erfolgreich!";
+                form.reset();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Car Reservation</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        .reservations-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        .reservations-table td, .reservations-table th {
+            border: 1px solid black;
+            padding: 8px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <script src="script.js"></script>
+
+    <main class="container">
+        <h1>Reservierungen:</h1>
+        <div id="reservationsList"></div>
+    </main>
+    <script>
+        const supabaseUrl = "https://xcmewlpcjdrvhzlkjubv.supabase.co";
+        const supabaseKey = "sb_publishable_4AAr3s-2kTVX7hZ5layp0Q_CctBtTEQ";
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function loadReservations() {
+            try {
+            const { data, error } = await supabaseClient
+                .from('reservations')
+                .select('*');
+
+            console.log("Alle Daten in 'reservations':", { data, error });
+
+            if (error) {
+                console.error("Fehler beim Abrufen der Reservierungen:", error.message);
+                return;
+            }
+
+            const reservationsList = document.getElementById("reservationsList");
+            reservationsList.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                reservationsList.innerHTML = "<p>Keine Reservierungen gefunden.</p>";
+                return;
+            }
+
+            let tableHTML = `
+                <table class="reservations-table">
+                <thead>
+                    <tr>
+                    <th>Name</th>
+                    <th>Datum</th>
+                    <th>Zeit</th>
+                    <th>Dauer (Stunden)</th>
+                    <th>Grund</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            data.forEach(reservation => {
+                const dateObj = new Date(reservation.reservation_time);
+                const date = dateObj.toLocaleDateString();
+                const time = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                tableHTML += `
+                <tr>
+                    <td>${reservation.name}</td>
+                    <td>${date}</td>
+                    <td>${time}</td>
+                    <td>${reservation.duration}</td>
+                    <td>${reservation.purpose}</td>
+                </tr>
+                `;
+            });
+
+            tableHTML += `
+                </tbody>
+                </table>
+            `;
+
+            reservationsList.innerHTML = tableHTML;
+            } catch (err) {
+            console.error("Unbekannter Fehler beim Laden der Reservierungen:", err);
+            }
+        }
+
+        loadReservations();
+    </script>
+    </script>
+</body>
+
+</html>

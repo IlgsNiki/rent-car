@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Car Reservation</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+    <script>
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        function checkLogin() {
+            let login = getCookie("login");
+            if (login == 1) {
+                window.location.href = '/index.html';
+            }
+        }
+        async function login() {
+            const nameInput = document.getElementById("name").value;
+            const passwordInput = document.getElementById("password").value;
+
+            const supabaseUrl = "https://xcmewlpcjdrvhzlkjubv.supabase.co";
+            const supabaseKey = "sb_publishable_4AAr3s-2kTVX7hZ5layp0Q_CctBtTEQ";
+            const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+            // 1. Prüfen, ob der Nutzer existiert
+            const { data, error } = await supabaseClient
+                .from('login')
+                .select('*')
+                .ilike('name', nameInput); // ilike = case-insensitive
+
+            if (error) {
+                console.error("Fehler beim Abrufen:", error.message);
+                alert("Login fehlgeschlagen!");
+                return;
+            }
+
+            if (data.length === 0) {
+                alert("Name nicht gefunden!");
+                return;
+            }
+
+            const user = data[0];
+
+            // 2. Prüfen, ob first_login false ist
+            if (!user.first_login) {
+
+                confirm("Erster Login erkannt! Bitte bestätige, dass du dein Passwort setzen möchtest.")
+                if (!confirm) {
+                    alert("Login abgebrochen!");
+                    return;
+                }
+                // Passwort erstmalig speichern + first_login auf true setzen
+                const { error: updateError } = await supabaseClient
+                    .from('login')
+                    .update({ password: passwordInput, first_login: true })
+                    .eq('id', user.id);
+
+                if (updateError) {
+                    console.error("Fehler beim Speichern des Passworts:", updateError.message);
+                    alert("Login fehlgeschlagen!");
+                    return;
+                }
+
+                // Cookies setzen & weiterleiten
+                setCookie("login", 1, 1);
+                setCookie("name", nameInput, 1);
+                window.location.href = '/index.html';
+                return;
+            }
+
+            // 3. First login = true → Passwort prüfen
+            if (user.password !== passwordInput) {
+                alert("Passwort falsch!");
+                return;
+            }
+
+            // Login erfolgreich
+            setCookie("login", 1, 1);
+            setCookie("name", nameInput, 1);
+            window.location.href = '/index.html';
+        }
+        checkLogin();
+    </script>
+    <main class="container">
+        <h1>Login</h1>
+        <form>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="login()">Login</button>
+        </form>
+    </main>
+
+</body>
+
+</html>
