@@ -11,9 +11,20 @@ function getCookie(name) {
     return null;
 }
 
+function loadHeader() {
+    fetch('header.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('header-placeholder').innerHTML = data;
+        })
+        .catch(error => console.error('Error loading header:', error));
+}
+
+loadHeader();
+
 function checkLogin() {
     let login = getCookie("login");
-    if (login != 1) window.location.href = '/login.html';
+    if (login != 1) window.location.href = 'login.html';
 }
 
 checkLogin();

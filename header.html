@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>header - you should not see this</title>
+    <style>
+        header {
+            display: flex;
+            justify-content: center;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        header a {
+            font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            color: black;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+            font-weight: bold;
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = name + "=" + value + ";expires=" + d.toUTCString() + ";path=/";
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function checkLogin() {
+            let login = getCookie("login");
+            if (login != 1) {
+                document.getElementById("login").style.display = "block";
+                document.getElementById("logout").style.display = "none";
+            }
+            else {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("logout").style.display = "block";
+            }
+        }
+
+        checkLogin();
+    </script>
+    <header>
+        <a href="index.html">Home</a>
+        <a href="reservations.html">Reservierungen</a>
+        <a id="login" href="login.html">Login</a>
+        <a id="logout" href="logout.html">Logout</a>
+    </header>
+</body>
+
+</html>
